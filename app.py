@@ -2,8 +2,11 @@ from tkinter import *
 from tkinter import messagebox as MessageBox
 from libs.helpers import displayDate
 from tkinter import filedialog as FileDialog
+from pathlib import Path
+from io import open
 
 filePath = ''
+filename = ''
 
 def newFile():
     global filePath
@@ -11,14 +14,23 @@ def newFile():
     editor.delete(1.0, END)
 
 def openFile():
-    global filePath
+    global filePath, filename
     monitorText.set('-- open file --')
     filePath = FileDialog.askopenfilename(
         initialdir='.', 
         filetypes=(('text files', '*.txt'),),
         title='Open text file'
         )
-    print(filePath)
+    if filePath != '':
+        file = open(filePath, 'r')
+        content = file.read()
+        editor.delete(1.0, END)
+        editor.insert(INSERT, content)
+        file.close()
+        del(file)
+    pt = Path(filePath)
+    filename = pt.name
+    monitorText.set('-- open file: {}'.format(filename))
 
 def saveFile():
     global filePath
