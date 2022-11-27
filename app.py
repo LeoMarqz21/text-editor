@@ -28,17 +28,52 @@ def openFile():
         editor.insert(INSERT, content)
         file.close()
         del(file)
-    pt = Path(filePath)
-    filename = pt.name
-    monitorText.set('-- open file: {}'.format(filename))
+        pt = Path(filePath)
+        filename = pt.name
+        monitorText.set('-- open file: {} --'.format(filename))
 
 def saveFile():
-    global filePath
-    monitorText.set('-- save file --')
+    global filePath, filename
+    if filePath != '':
+        #se obtiene el contenido y se elimina el ultimo salto de linea
+        #agregado automaticamente
+        content = editor.get(1.0, 'end-1c') 
+        file = open(filePath, 'w+')
+        file.write(content)
+        file.close()
+        del(file)
+        monitorText.set('-- save file: {} --'.format(filename))
+    else:
+        saveFileAs()
 
 def saveFileAs():
-    global filePath
-    monitorText.set('-- save file as --')
+    global filePath, filename
+    file = FileDialog.asksaveasfile(
+        title='Save file as', 
+        mode='w', 
+        defaultextension='.txt',
+        filetypes=(('text files', '*.txt'),)
+        )
+    if file is not None:
+        filePath = file.name
+        content = editor.get(1.0, 'end-1c') 
+        file = open(filePath, 'w+')
+        file.write(content)
+        file.close()
+        del(file)
+        pt = Path(filePath)
+        filename = pt.name
+        monitorText.set('-- file saved as: {} --'.format(filename))
+    else:
+        monitorText.set('-- unsaved file --')
+        filePath = ''
+        filename = ''
+
+def closeFile():
+    global filePath, filename
+    filePath = ''
+    filename = ''
+    editor.delete(1.0, END)
 
 app = Tk()
 app.iconbitmap('./images/logo.ico')
@@ -53,6 +88,7 @@ fileMenu.add_command(label='New File', font=('Consolas', 12), command=newFile)
 fileMenu.add_command(label='Open File', font=('Consolas', 12), command=openFile)
 fileMenu.add_command(label='Save File', font=('Consolas', 12), command=saveFile)
 fileMenu.add_command(label='Save File As', font=('Consolas', 12), command=saveFileAs)
+fileMenu.add_command(label='Close file', font=('Consolas', 12), command=closeFile)
 fileMenu.add_separator()
 fileMenu.add_command(label='Exit', command=app.quit, font=('Consolas', 12))
 
